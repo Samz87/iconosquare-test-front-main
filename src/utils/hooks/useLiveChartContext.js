@@ -7,7 +7,7 @@ const initialEvents = Array.from(Array(50)).map((_, ix) => createRandomEvent(ix)
 
 const initialData = {
     events: initialEvents,
-    paused: false
+    paused: false,
 }
 
 const liveChartReducer = (state, action) => {
@@ -15,7 +15,7 @@ const liveChartReducer = (state, action) => {
         case 'new_event':
             if (!state.paused) {
                 return {
-                    events: [...state.events, action.payload]
+                    events: [...state.events, action.payload],
                 }
             }
             return state;
@@ -40,13 +40,20 @@ const liveChartReducer = (state, action) => {
                 events: updatedEvents
             };
 
+        // Add a new case to handle the 'change_page' action type
+        case 'change_page':
+            return {
+                ...state,
+                currentPage: action.payload.page,
+            };
+            
         // Add a new case to handle the 'reset_events' action type    
         case 'reset_events':
             return {
                 ...state,
                 events: initialEvents
             };
-            
+
         default: {
             throw new Error(`Unhandled action type: ${action.type}`);
         }

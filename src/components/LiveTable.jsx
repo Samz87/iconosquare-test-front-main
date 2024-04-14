@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLiveChartContext } from "../utils/hooks/useLiveChartContext";
 
-const LiveTable = ({ editInfo }) => {
+const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
   const { data, updateEvent, togglePause } = useLiveChartContext();
   const [wasPausedBeforeEdit, setWasPausedBeforeEdit] = useState(false);
-  const nbTotalEvents = data?.events?.length;
-  const eventsFiltered = data.events.slice(nbTotalEvents - 20, nbTotalEvents);
+    const eventsFiltered = data.events.slice(
+      startEventIndex,
+      startEventIndex + pageSize
+    );
 
   const [editState, setEditState] = useState({
     index: null,
@@ -94,4 +96,5 @@ const LiveTable = ({ editInfo }) => {
 };
 
 export default LiveTable;
+
 

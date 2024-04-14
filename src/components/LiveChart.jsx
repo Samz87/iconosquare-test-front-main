@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { useLiveChartContext } from "../utils/hooks/useLiveChartContext";
 
-const LiveChart = ({ onChartPointClick }) => {
+const LiveChart = ({ onChartPointClick, pageSize, startEventIndex }) => {
   const { data, togglePause, resetEvents } = useLiveChartContext();
 
   const handleClick = (data, index) => {
@@ -19,8 +19,10 @@ const LiveChart = ({ onChartPointClick }) => {
     }
   };
 
-  const nbTotalEvents = data?.events?.length;
-  const eventsFiltered = data.events.slice(nbTotalEvents - 20, nbTotalEvents);
+  const eventsFiltered = data.events.slice(
+    startEventIndex,
+    startEventIndex + pageSize
+  );
 
   return (
     <div className="mb-8">
