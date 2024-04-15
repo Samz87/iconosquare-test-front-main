@@ -2,45 +2,50 @@ import React, { useState, useEffect } from "react";
 import LiveTable from "./LiveTable";
 import LiveChart from "./LiveChart";
 import { useLiveChartContext } from "../utils/hooks/useLiveChartContext";
+import { ChartEvent } from "../utils/interfaces/ChartEvent";
 
-const Content = () => {
-  const { data, togglePause } = useLiveChartContext();
-  const [editInfo, setEditInfo] = useState({ index: null, type: null });
+const Content: React.FC = () => {
+  const { state, togglePause } = useLiveChartContext();
+
+  const [editInfo, setEditInfo] = useState({
+    index: null as number | null,
+    type: null as keyof ChartEvent | null,
+    data: {} as { [key: string]: any },
+  });
 
   const pageSize = 20;
-
   const [startEventIndex, setStartEventIndex] = useState(
-    Math.max(0, data.events.length - pageSize)
+    Math.max(0, state.events.length - pageSize)
   );
 
   useEffect(() => {
-    const updateIndex = data.paused
+    const updateIndex = state.paused
       ? startEventIndex
-      : Math.max(0, data.events.length - pageSize);
+      : Math.max(0, state.events.length - pageSize);
     setStartEventIndex(updateIndex);
-  }, [data.events.length, data.paused, pageSize]);
+  }, [state.events.length, state.paused, pageSize, startEventIndex]);
 
-  const handleChartPointClick = (data, index) => {
+  const handleChartPointClick = (data: any, index: number) => {
     setEditInfo({ data, index, type: "value1" });
   };
 
   const handlePrevious = () => {
-    if (!data.paused) {
+    if (!state.paused) {
       togglePause();
     }
     setStartEventIndex((prevIndex) => Math.max(0, prevIndex - pageSize));
   };
 
   const handleNext = () => {
-    if (!data.paused) {
+    if (!state.paused) {
       togglePause();
     }
     setStartEventIndex((prevIndex) =>
-      Math.min(data.events.length - pageSize, prevIndex + pageSize)
+      Math.min(state.events.length - pageSize, prevIndex + pageSize)
     );
   };
 
-  const isAtEnd = startEventIndex >= data.events.length - pageSize;
+  const isAtEnd = startEventIndex >= state.events.length - pageSize;
 
   return (
     <div className="mx-auto max-w-7xl px-8">
@@ -73,4 +78,3 @@ const Content = () => {
 };
 
 export default Content;
-

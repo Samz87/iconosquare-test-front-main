@@ -10,40 +10,54 @@ import {
 } from "recharts";
 import { useLiveChartContext } from "../utils/hooks/useLiveChartContext";
 
-const LiveChart = ({ onChartPointClick, pageSize, startEventIndex }) => {
-  const { data, togglePause, resetEvents } = useLiveChartContext();
+interface LiveChartProps {
+  onChartPointClick: (data: any, index: number) => void;
+  pageSize: number;
+  startEventIndex: number;
+}
 
-  const handleClick = (data, index) => {
+const LiveChart: React.FC<LiveChartProps> = ({
+  onChartPointClick,
+  pageSize,
+  startEventIndex,
+}) => {
+  const { state, togglePause, resetEvents } = useLiveChartContext();
+
+  const handleClick = (data: any, index: number) => {
     if (onChartPointClick) {
       onChartPointClick(data, index);
     }
   };
 
-  const eventsFiltered = data.events.slice(
+  const eventsFiltered = state.events.slice(
     startEventIndex,
     startEventIndex + pageSize
   );
 
   return (
-    <div className="mb-8">
+    <div className="mb-2">
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={togglePause}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-2 rounded">
+          {state.paused ? "Resume" : "Pause"}
+        </button>
+
+        <button
+          onClick={() => resetEvents()}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded self-end">
+          Reset
+        </button>
+      </div>
       <ResponsiveContainer height={250}>
-        <div className="flex justify-center mb-4">
-          <button
-            onClick={togglePause}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mx-2 rounded">
-            {data.paused ? "Resume" : "Pause"}
-          </button>
-
-          <button
-            onClick={() => resetEvents()}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded self-end">
-            Reset
-          </button>
-        </div>
-
         <AreaChart
           onClick={(e) => {
-            if (e && e.activePayload && e.activePayload.length > 0) {
+            if (
+              e &&
+              e.activePayload &&
+              e.activePayload.length > 0 &&
+              e.activeTooltipIndex !== undefined
+            ) {
               handleClick(e.activePayload[0].payload, e.activeTooltipIndex);
             }
           }}
@@ -85,7 +99,4 @@ const LiveChart = ({ onChartPointClick, pageSize, startEventIndex }) => {
   );
 };
 
-LiveChart.propTypes = {};
-
 export default LiveChart;
-

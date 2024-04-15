@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useLiveChartContext } from "../utils/hooks/useLiveChartContext";
+import { ChartEvent } from "../utils/interfaces/ChartEvent"; 
+interface LiveTableProps {
+  editInfo: {
+    index: number | null;
+    type: keyof ChartEvent | null;
+    data: { [key: string]: any };
+  };
+  pageSize: number;
+  startEventIndex: number;
+}
 
-const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
-  const { data, updateEvent, togglePause } = useLiveChartContext();
+const LiveTable: React.FC<LiveTableProps> = ({
+  editInfo,
+  pageSize,
+  startEventIndex,
+}) => {
+  const { state, updateEvent, togglePause } = useLiveChartContext();
   const [wasPausedBeforeEdit, setWasPausedBeforeEdit] = useState(false);
-    const eventsFiltered = data.events.slice(
-      startEventIndex,
-      startEventIndex + pageSize
-    );
+  const eventsFiltered = state.events.slice(
+    startEventIndex,
+    startEventIndex + pageSize
+  );
 
   const [editState, setEditState] = useState({
-    index: null,
-    type: null,
-    value: "",
+    index: null as number | null,
+    type: null as keyof ChartEvent | null,
+    value: "" as any,
   });
 
-  const handleEdit = (index, type, value) => {
-    if (!data.paused) {
+  const handleEdit = (index: number, type: keyof ChartEvent, value: any) => {
+    if (!state.paused) {
       togglePause();
       setWasPausedBeforeEdit(false);
     } else {
@@ -26,19 +40,21 @@ const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
   };
 
   useEffect(() => {
-    if (editInfo.index !== null) {
+    if (editInfo.index !== null && editInfo.type !== null) {
       handleEdit(editInfo.index, editInfo.type, editInfo.data[editInfo.type]);
     }
-    //eslint-disable-next-line
-  }, [editInfo]);
+  }, [editInfo, editInfo.index, editInfo.type, editInfo.data]);
 
-  const handleSave = (index, valueType) => {
-    const realIndex = data.events.length - 20 + index;
-    updateEvent(realIndex, valueType, editState.value);
-    setEditState({ index: null, type: null, value: "" });
-
-    if (!wasPausedBeforeEdit) {
-      togglePause();
+  const handleSave = (index: number, valueType: keyof ChartEvent) => {
+    if (!isNaN(Number(editState.value))) {
+      const realIndex = state.events.length - pageSize + index;
+      updateEvent(realIndex, valueType, Number(editState.value));
+      setEditState({ index: null, type: null, value: "" });
+      if (!wasPausedBeforeEdit) {
+        togglePause();
+      }
+    } else {
+      alert("Please enter a valid number.");
     }
   };
 
@@ -57,7 +73,7 @@ const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
           <div className="p-2 border-t border-gray-300">
             {editState.index === index && editState.type === "value1" ? (
               <input
-                type="text"
+                type="number"
                 value={editState.value}
                 onChange={(e) =>
                   setEditState({ ...editState, value: e.target.value })
@@ -75,7 +91,7 @@ const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
           <div className="p-2 border-t border-gray-300">
             {editState.index === index && editState.type === "value2" ? (
               <input
-                type="text"
+                type="number"
                 value={editState.value}
                 onChange={(e) =>
                   setEditState({ ...editState, value: e.target.value })
@@ -96,5 +112,3 @@ const LiveTable = ({ editInfo, pageSize, startEventIndex }) => {
 };
 
 export default LiveTable;
-
-
